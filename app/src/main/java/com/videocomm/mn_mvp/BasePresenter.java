@@ -6,5 +6,6 @@ package com.videocomm.mn_mvp;
  * @function[功能简介 ]
  **/
 public interface BasePresenter {
-
+    void subscribe();
+    void unsubscribe();
 }

@@ -92,4 +92,11 @@ public class IpInfoFragment extends Fragment implements IpInfoContract.View {
     public void setPresenter(IpInfoContract.Presenter presenter) {
         mPresenter = presenter;
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //取消网络请求
+        mPresenter.unsubscribe();
+    }
 }

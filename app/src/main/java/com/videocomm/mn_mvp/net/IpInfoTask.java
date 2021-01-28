@@ -16,6 +16,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * @author[]
@@ -24,10 +31,19 @@ import okhttp3.Response;
  **/
 public class IpInfoTask implements NetTask<String> {
     private static IpInfoTask INSTANCE = null;
-    private static final String HOST = "https://v1.jinrishici.com/all.json";
+    private static final String HOST = "https://v1.jinrishici.com/";
+    private Retrofit retrofit;
 
-    private IpInfoTask() {
+    public IpInfoTask() {
+        createRetrofit();
+    }
 
+    private void createRetrofit() {
+        retrofit = new Retrofit.Builder().
+                baseUrl(HOST).
+                addConverterFactory(GsonConverterFactory.create()).
+                addCallAdapterFactory(RxJavaCallAdapterFactory.create()).
+                build();
     }
 
     public static IpInfoTask getInstance() {
@@ -38,33 +54,59 @@ public class IpInfoTask implements NetTask<String> {
     }
 
     @Override
-    public void execute(String ip, LoadTasksCallBack callBack) {
-//        RequestParams requestParams = new RequestParams();
-//        requestParams.addFormDataPart("ip", ip);
-        HttpRequest.post(HOST, new BaseHttpRequestCallback<IpInfo>() {
+    public Subscription execute(String data, LoadTasksCallBack loadTasksCallBack) {
+        IpService ipService = retrofit.create(IpService.class);
+        Subscription Subscription = ipService.getIpInfo().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<IpInfo>() {
             @Override
             public void onStart() {
-                super.onStart();
-                callBack.onStart();
+                loadTasksCallBack.onStart();
             }
 
             @Override
-            protected void onSuccess(IpInfo ipInfo) {
-                super.onSuccess(ipInfo);
-                callBack.onSuccess(ipInfo);
+            public void onCompleted() {
+                loadTasksCallBack.onFinish();
             }
 
             @Override
-            public void onFinish() {
-                super.onFinish();
-                callBack.onFinish();
+            public void onError(Throwable e) {
+                loadTasksCallBack.onFailed();
             }
 
             @Override
-            public void onFailure(int errorCode, String msg) {
-                super.onFailure(errorCode, msg);
-                callBack.onFailed();
+            public void onNext(IpInfo ipInfo) {
+                loadTasksCallBack.onSuccess(ipInfo);
             }
         });
+
+        return Subscription;
     }
+
+//    @Override
+//    public void execute(String ip, LoadTasksCallBack callBack) {
+//        HttpRequest.post(HOST, new BaseHttpRequestCallback<IpInfo>() {
+//            @Override
+//            public void onStart() {
+//                super.onStart();
+//                callBack.onStart();
+//            }
+//
+//            @Override
+//            protected void onSuccess(IpInfo ipInfo) {
+//                super.onSuccess(ipInfo);
+//                callBack.onSuccess(ipInfo);
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                super.onFinish();
+//                callBack.onFinish();
+//            }
+//
+//            @Override
+//            public void onFailure(int errorCode, String msg) {
+//                super.onFailure(errorCode, msg);
+//                callBack.onFailed();
+//            }
+//        });
+//    }
 }
