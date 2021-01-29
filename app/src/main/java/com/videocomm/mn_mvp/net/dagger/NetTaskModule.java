@@ -1,4 +1,7 @@
-package com.videocomm.mn_mvp.net;
+package com.videocomm.mn_mvp.net.dagger;
+
+import com.videocomm.mn_mvp.net.IpInfoTask;
+import com.videocomm.mn_mvp.net.NetTask;
 
 import javax.inject.Singleton;
 

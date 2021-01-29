@@ -4,6 +4,8 @@ import com.videocomm.mn_mvp.model.IpInfo;
 import com.videocomm.mn_mvp.net.LoadTasksCallBack;
 import com.videocomm.mn_mvp.net.NetTask;
 
+import javax.inject.Inject;
+
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
@@ -18,10 +20,23 @@ public class IpInfoPresenter implements IpInfoContract.Presenter, LoadTasksCallB
     private Subscription subscription;
     private CompositeSubscription mSubscriptions;
 
-    public IpInfoPresenter(NetTask netTask, IpInfoContract.View addTaskView) {
+
+    /**
+     * IpInfoPresenter的构造方法用@Inject标记，
+     * 意味着Dagger2可以使用IpInfoPresenter构造方法来构建IpInfoPresenter。
+     * @param netTask
+     * @param addTaskView
+     */
+    @Inject
+    public IpInfoPresenter(IpInfoContract.View addTaskView,NetTask netTask) {
         this.netTask = netTask;
         this.addTaskView = addTaskView;
         mSubscriptions = new CompositeSubscription();
+    }
+
+    @Inject
+    void setPresenter(){
+        addTaskView.setPresenter(this);
     }
 
     @Override
